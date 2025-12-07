@@ -55,7 +55,16 @@ public class WelcomePage {
         // ========== CONTENT PANEL (TENGAH) ==========
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setOpaque(false); // Transparan agar background terlihat
+        contentPanel.setOpaque(true); // Opaque agar background border terlihat
+        contentPanel.setBackground(backgroundColor);
+
+        // BORDER SEKELILING CONTENT PANEL
+        Border contentBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(primaryColor, 2), // Border luar
+                BorderFactory.createEmptyBorder(30, 40, 30, 40) // Padding dalam
+        );
+        contentPanel.setBorder(contentBorder);
+        contentPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         WelcomeToReadArchives = new JLabel("Welcome to ReadArchives!");
         WelcomeToReadArchives.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -64,7 +73,7 @@ public class WelcomePage {
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setOpaque(false);
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         formPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JPanel loginSection = new JPanel();
