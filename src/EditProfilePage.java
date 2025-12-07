@@ -292,7 +292,7 @@ public class EditProfilePage {
             }
         }
 
-        // Update data via MainControl
+        // TAMBAH INI: Update data ke MainControl
         MainControl.updateUserProfile(newDisplayName, newEmail);
     }
 

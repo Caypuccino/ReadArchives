@@ -37,7 +37,7 @@ public class ProfilePage {
     private Color backgroundColor = Color.WHITE;
     private Color panelBackground = new Color(245, 247, 250);
 
-    // Data storage
+    // Data storage - DITAMBAH untuk integrasi
     private String currentDisplayName = "ReadArchive";
     private String currentEmail = "user@example.com";
 
@@ -66,20 +66,18 @@ public class ProfilePage {
         profilePagePanel.add(headerPanel, BorderLayout.NORTH);
 
         // MAIN CONTENT PANEL
-        JPanel mainContentPanel = new JPanel();
-        mainContentPanel.setLayout(new BoxLayout(mainContentPanel, BoxLayout.Y_AXIS));
+        JPanel mainContentPanel = new JPanel(new BorderLayout());
         mainContentPanel.setBackground(panelBackground);
         mainContentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // NAVIGATION TABS
+        // NAVIGATION TABS - DI TENGAH ATAS
         JPanel navPanel = createNavigationPanel();
-        mainContentPanel.add(navPanel);
-        mainContentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        mainContentPanel.add(navPanel, BorderLayout.NORTH);
 
-        // CONTENT AREA
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new GridLayout(1, 2, 20, 0));
+        // CONTENT PANEL
+        JPanel contentPanel = new JPanel(new GridLayout(1, 2, 20, 0));
         contentPanel.setOpaque(false);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         // LEFT PANEL - PROFILE
         JPanel profilePanel = createProfilePanel();
@@ -89,20 +87,28 @@ public class ProfilePage {
         JPanel statsPanel = createStatisticsPanel();
         contentPanel.add(statsPanel);
 
-        mainContentPanel.add(contentPanel);
-        mainContentPanel.add(Box.createVerticalGlue());
+        mainContentPanel.add(contentPanel, BorderLayout.CENTER);
 
         profilePagePanel.add(mainContentPanel, BorderLayout.CENTER);
     }
 
     private JPanel createNavigationPanel() {
         JPanel navPanel = new JPanel();
-        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.X_AXIS));
+        navPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
         navPanel.setOpaque(false);
-        navPanel.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
-        navPanel.setBackground(Color.WHITE);
+        navPanel.setBackground(panelBackground);
 
-        BMyProfile = createNavButton("MY PROFILE");
+        // Container untuk tabs dengan background putih
+        JPanel tabsContainer = new JPanel();
+        tabsContainer.setLayout(new BoxLayout(tabsContainer, BoxLayout.X_AXIS));
+        tabsContainer.setBackground(Color.WHITE);
+        tabsContainer.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+                BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+        tabsContainer.setMaximumSize(new Dimension(450, 45));
+
+        BMyProfile = createNavButton("PROFILE");
         BLibrary = createNavButton("LIBRARY");
         BExit = createNavButton("EXIT");
 
@@ -110,10 +116,11 @@ public class ProfilePage {
         BMyProfile.setBackground(primaryColor);
         BMyProfile.setForeground(secondaryColor);
 
-        navPanel.add(BMyProfile);
-        navPanel.add(BLibrary);
-        navPanel.add(BExit);
+        tabsContainer.add(BMyProfile);
+        tabsContainer.add(BLibrary);
+        tabsContainer.add(BExit);
 
+        navPanel.add(tabsContainer);
         return navPanel;
     }
 
@@ -127,12 +134,21 @@ public class ProfilePage {
         button.setForeground(primaryColor);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        Dimension buttonSize = new Dimension(150, 40);
+        Dimension buttonSize = new Dimension(150, 45);
         button.setPreferredSize(buttonSize);
         button.setMaximumSize(buttonSize);
         button.setMinimumSize(buttonSize);
 
-        button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        // Border antar button
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        // Hapus border kanan untuk button terakhir
+        if (text.equals("EXIT")) {
+            button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        }
 
         return button;
     }
@@ -159,28 +175,31 @@ public class ProfilePage {
         headerPanel.add(JMyProfile, BorderLayout.WEST);
         headerPanel.add(BEditProfile, BorderLayout.EAST);
 
-        // Profile Details - PAKAI GRID BAG LAYOUT untuk alignment presisi
+        // Profile Details
         JPanel detailsPanel = new JPanel(new GridBagLayout());
         detailsPanel.setOpaque(false);
         detailsPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 20, 20));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 0, 5, 0); // Spacing vertikal
+        gbc.insets = new Insets(5, 0, 5, 0);
         gbc.weightx = 1.0;
 
         // Row 1: Display Name
         gbc.gridx = 0;
         gbc.gridy = 0;
-        detailsPanel.add(createCompactRow("Display Name", JDisplayValue = new JLabel()), gbc);
+        JDisplayValue = new JLabel();
+        detailsPanel.add(createCompactRow("Display Name", JDisplayValue), gbc);
 
         // Row 2: Email
         gbc.gridy = 1;
-        detailsPanel.add(createCompactRow("Email", JEmailValue = new JLabel()), gbc);
+        JEmailValue = new JLabel();
+        detailsPanel.add(createCompactRow("Email", JEmailValue), gbc);
 
         // Row 3: Password
         gbc.gridy = 2;
-        detailsPanel.add(createCompactRow("Password", JPasswordValue = new JLabel("••••••••")), gbc);
+        JPasswordValue = new JLabel("••••••••");
+        detailsPanel.add(createCompactRow("Password", JPasswordValue), gbc);
 
         profilePanel.add(headerPanel, BorderLayout.NORTH);
         profilePanel.add(detailsPanel, BorderLayout.CENTER);
@@ -203,7 +222,6 @@ public class ProfilePage {
         row.add(labelComponent, BorderLayout.WEST);
         row.add(value, BorderLayout.CENTER);
 
-        // Atur tinggi konsisten
         row.setPreferredSize(new Dimension(row.getPreferredSize().width, 30));
 
         return row;
@@ -232,16 +250,20 @@ public class ProfilePage {
         gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
 
         // Total Items
-        gridPanel.add(createStatCard("Total Collections", JTotalValue = new JLabel("0")));
+        JTotalValue = new JLabel("0");
+        gridPanel.add(createStatCard("Total Collections", JTotalValue));
 
         // Reading
-        gridPanel.add(createStatCard("Reading", JReadingValue = new JLabel("0")));
+        JReadingValue = new JLabel("0");
+        gridPanel.add(createStatCard("Reading", JReadingValue));
 
         // Completed
-        gridPanel.add(createStatCard("Completed", JCompletedValue = new JLabel("0")));
+        JCompletedValue = new JLabel("0");
+        gridPanel.add(createStatCard("Completed", JCompletedValue));
 
         // Plan to Read
-        gridPanel.add(createStatCard("Plan to Read", JPlanToReadValue = new JLabel("0")));
+        JPlanToReadValue = new JLabel("0");
+        gridPanel.add(createStatCard("Plan to Read", JPlanToReadValue));
 
         statsPanel.add(headerPanel, BorderLayout.NORTH);
         statsPanel.add(gridPanel, BorderLayout.CENTER);
@@ -318,8 +340,8 @@ public class ProfilePage {
             resetNavButtons();
             BLibrary.setBackground(primaryColor);
             BLibrary.setForeground(secondaryColor);
-            // Panggil MainControl untuk pindah ke Library
-            MainControl.showDashboard(); // atau MainControl.showLibraryPage() jika ada
+            // Panggil MainControl untuk pindah ke Dashboard
+            MainControl.showDashboard();
         });
 
         BExit.addActionListener(e -> {

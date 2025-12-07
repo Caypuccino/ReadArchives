@@ -331,10 +331,8 @@ public class AddNewCollections {
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE);
 
-                // Kembali ke halaman sebelumnya
-                if (MainControl.class != null) {
-                    MainControl.showDashboard();
-                }
+                // Kembali ke Dashboard via MainControl
+                MainControl.showDashboard();
             }
         });
 
@@ -349,10 +347,8 @@ public class AddNewCollections {
             if (confirm == JOptionPane.YES_OPTION) {
                 resetForm();
 
-                // Kembali ke halaman sebelumnya
-                if (MainControl.class != null) {
-                    MainControl.showDashboard();
-                }
+                // Kembali ke Dashboard via MainControl
+                MainControl.showDashboard();
             }
         });
 
@@ -477,12 +473,6 @@ public class AddNewCollections {
         System.out.println("Status: " + status);
         System.out.println("Rating: " + rating);
         System.out.println("============================");
-
-        // Tambahkan ke MainControl jika perlu
-        if (MainControl.getProfilePage() != null) {
-            // Update statistics di ProfilePage
-            // Misalnya tambah 1 ke total collections
-        }
     }
 
     private void resetForm() {

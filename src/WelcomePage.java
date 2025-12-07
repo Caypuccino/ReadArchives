@@ -253,6 +253,8 @@ public class WelcomePage {
                             "Please fill in both fields!",
                             "Input Error", JOptionPane.WARNING_MESSAGE);
                 } else {
+                    // Simulasi login sukses
+                    // Di sini nanti bisa tambah validasi username/password dari database
                     MainControl.showDashboard();
                     loginField.setText("");
                     passwordField1.setText("");
