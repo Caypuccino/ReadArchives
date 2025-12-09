@@ -9,11 +9,20 @@ public class Dashboard {
     private JButton BLibrary;
     private JButton BExit;
 
+    // Filter Components
+    private JButton BWebComic;
+    private JButton BWebNovel;
+
     // Color Scheme
     private Color primaryColor = new Color(51, 61, 87);
     private Color secondaryColor = new Color(249, 206, 146);
     private Color backgroundColor = Color.WHITE;
     private Color panelBackground = new Color(245, 247, 250);
+
+    // Components untuk diakses dari luar
+    private JPanel cardsContainer;
+    private JLabel totalLabel;
+    private JButton addBtn;
 
     public Dashboard() {
         mainPanel = new JPanel(new BorderLayout());
@@ -36,7 +45,7 @@ public class Dashboard {
         mainContentPanel.setBackground(panelBackground);
         mainContentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // NAVIGATION TABS - DI TENGAH ATAS (SEPERTI DI PROFILEPAGE)
+        // NAVIGATION TABS - DI TENGAH ATAS
         JPanel navPanel = createNavigationPanel();
         mainContentPanel.add(navPanel, BorderLayout.NORTH);
 
@@ -45,52 +54,13 @@ public class Dashboard {
         contentWrapper.setBackground(panelBackground);
         contentWrapper.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
 
-        // ====================== BLUE CONTENT PANEL ======================
-        JPanel bluePanel = new JPanel();
-        bluePanel.setBackground(primaryColor);
-        bluePanel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
-        bluePanel.setLayout(new BoxLayout(bluePanel, BoxLayout.Y_AXIS));
+        // ====================== FILTER TABS ======================
+        JPanel filterPanel = createFilterPanel();
+        contentWrapper.add(filterPanel, BorderLayout.NORTH);
 
-        bluePanel.setPreferredSize(new Dimension(850, 350));
-
-        // ===================== ROW ATAS: TOTAL ITEMS + BUTTON =====================
-        JPanel topRow = new JPanel(new BorderLayout());
-        topRow.setOpaque(false);
-
-        // kiri = total items
-        JLabel totalLabel = new JLabel("Total: XX Items");
-        totalLabel.setForeground(Color.WHITE);
-        totalLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        topRow.add(totalLabel, BorderLayout.WEST);
-
-        // kanan = tombol add new collections
-        JButton addBtn = createAddButton();
-        topRow.add(addBtn, BorderLayout.EAST);
-
-        bluePanel.add(topRow);
-        bluePanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        // ========================= GRID 4 KOTAK =========================
-        JPanel grid = new JPanel(new GridLayout(2, 2, 20, 20));
-        grid.setOpaque(false);
-
-        grid.add(createCard("Title", "author?", "Chapter XX/XX", "Reading"));
-        grid.add(createCard("Title", "author?", "Chapter XX/XX", "Completed", "4.5/5"));
-        grid.add(createCard("Title", "author?", "Chapter XX/XX", "Plan to Read"));
-        grid.add(createCard("Title", "author?", "Chapter XX/XX", "Reading"));
-
-        bluePanel.add(grid);
-
-        // Center the blue panel
-        JPanel centerHolder = new JPanel(new GridBagLayout());
-        centerHolder.setBackground(panelBackground);
-        centerHolder.add(bluePanel);
-
-        contentWrapper.add(centerHolder, BorderLayout.CENTER);
-
-        // ========================= FOOTER PAGINATION =========================
-        JPanel footerPanel = createFooterPanel();
-        contentWrapper.add(footerPanel, BorderLayout.SOUTH);
+        // ====================== SCROLLABLE CONTENT AREA ======================
+        JScrollPane scrollContent = createScrollableContent();
+        contentWrapper.add(scrollContent, BorderLayout.CENTER);
 
         // Add content wrapper to main content
         mainContentPanel.add(contentWrapper, BorderLayout.CENTER);
@@ -99,8 +69,168 @@ public class Dashboard {
         ((JPanel) mainPanel).add(mainContentPanel, BorderLayout.CENTER);
     }
 
-    // ===== NAVIGATION PANEL (DI TENGAH SEPERTI DI PROFILEPAGE) =====
+    // ===== FILTER PANEL (WEBCOMIC / WEBNOVEL) =====
+    private JPanel createFilterPanel() {
+        JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        filterPanel.setOpaque(false);
+        filterPanel.setBackground(panelBackground);
+        filterPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
+        // Container untuk filter tabs dengan background putih
+        JPanel filterContainer = new JPanel();
+        filterContainer.setLayout(new BoxLayout(filterContainer, BoxLayout.X_AXIS));
+        filterContainer.setBackground(Color.WHITE);
+        filterContainer.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+                BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+        filterContainer.setMaximumSize(new Dimension(300, 40));
+
+        BWebComic = createFilterButton("WEBCOMIC");
+        BWebNovel = createFilterButton("WEBNOVEL");
+
+        // Set WebComic as active secara default
+        BWebComic.setBackground(primaryColor);
+        BWebComic.setForeground(secondaryColor);
+
+        filterContainer.add(BWebComic);
+        filterContainer.add(BWebNovel);
+
+        filterPanel.add(filterContainer);
+
+        setupFilterEvents();
+
+        return filterPanel;
+    }
+
+    private JButton createFilterButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(true);
+        button.setBackground(Color.WHITE);
+        button.setForeground(primaryColor);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        Dimension buttonSize = new Dimension(150, 40);
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+        button.setMinimumSize(buttonSize);
+
+        // Border antar button
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        // Hapus border kanan untuk button terakhir
+        if (text.equals("WEBNOVEL")) {
+            button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        }
+
+        return button;
+    }
+
+    private void setupFilterEvents() {
+        // WebComic Button
+        BWebComic.addActionListener(e -> {
+            resetFilterButtons();
+            BWebComic.setBackground(primaryColor);
+            BWebComic.setForeground(secondaryColor);
+            System.out.println("Filter: WebComic selected");
+            // Di sini bisa tambahkan logika untuk filter konten WebComic
+        });
+
+        // WebNovel Button
+        BWebNovel.addActionListener(e -> {
+            resetFilterButtons();
+            BWebNovel.setBackground(primaryColor);
+            BWebNovel.setForeground(secondaryColor);
+            System.out.println("Filter: WebNovel selected");
+            // Di sini bisa tambahkan logika untuk filter konten WebNovel
+        });
+    }
+
+    private void resetFilterButtons() {
+        JButton[] filterButtons = {BWebComic, BWebNovel};
+        for (JButton button : filterButtons) {
+            button.setBackground(Color.WHITE);
+            button.setForeground(primaryColor);
+        }
+    }
+
+    // ===== SCROLLABLE CONTENT AREA =====
+    private JScrollPane createScrollableContent() {
+        // Panel utama untuk konten yang bisa discroll
+        JPanel scrollablePanel = new JPanel();
+        scrollablePanel.setLayout(new BoxLayout(scrollablePanel, BoxLayout.Y_AXIS));
+        scrollablePanel.setBackground(panelBackground);
+
+        // Container untuk blue panel
+        JPanel centerHolder = new JPanel(new GridBagLayout());
+        centerHolder.setBackground(panelBackground);
+
+        // ====================== BLUE CONTENT PANEL ======================
+        JPanel bluePanel = new JPanel();
+        bluePanel.setBackground(primaryColor);
+        bluePanel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
+        bluePanel.setLayout(new BoxLayout(bluePanel, BoxLayout.Y_AXIS));
+
+        // ===================== ROW ATAS: TOTAL ITEMS + BUTTON =====================
+        JPanel topRow = new JPanel(new BorderLayout());
+        topRow.setOpaque(false);
+
+        // kiri = total items
+        totalLabel = new JLabel("Total: 0 Items");
+        totalLabel.setForeground(Color.WHITE);
+        totalLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        topRow.add(totalLabel, BorderLayout.WEST);
+
+        // kanan = tombol add new collections
+        addBtn = createAddButton();
+        topRow.add(addBtn, BorderLayout.EAST);
+
+        bluePanel.add(topRow);
+        bluePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // ========================= CARDS CONTAINER =========================
+        cardsContainer = new JPanel();
+        cardsContainer.setLayout(new BoxLayout(cardsContainer, BoxLayout.Y_AXIS));
+        cardsContainer.setOpaque(false);
+
+        // Grid container untuk menampung card-card
+        JPanel gridContainer = new JPanel();
+        gridContainer.setLayout(new GridLayout(0, 2, 20, 20)); // 0 rows berarti dinamis
+        gridContainer.setOpaque(false);
+
+        cardsContainer.add(gridContainer);
+        bluePanel.add(cardsContainer);
+
+        centerHolder.add(bluePanel);
+        scrollablePanel.add(centerHolder);
+
+        // Tambahkan padding bawah
+        scrollablePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Buat JScrollPane dengan scrollablePanel
+        JScrollPane scrollPane = new JScrollPane(scrollablePanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(panelBackground);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // Customize scrollbar agar lebih smooth
+        JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
+        verticalScrollBar.setUnitIncrement(16);
+        verticalScrollBar.setBackground(panelBackground);
+        verticalScrollBar.setForeground(primaryColor);
+
+        return scrollPane;
+    }
+
+    // ===== NAVIGATION PANEL =====
     private JPanel createNavigationPanel() {
         JPanel navPanel = new JPanel();
         navPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
@@ -202,7 +332,6 @@ public class Dashboard {
     }
 
     // ===== ADD BUTTON =====
-
     private JButton createAddButton() {
         JButton addBtn = new JButton("Add New Collections");
         addBtn.setFont(new Font("Arial", Font.BOLD, 12));
@@ -231,12 +360,11 @@ public class Dashboard {
     }
 
     // ===== CARD COMPONENTS =====
-
-    private JPanel createCard(String title, String author, String chapter, String status) {
+    public JPanel createCard(String title, String author, String chapter, String status) {
         return createCard(title, author, chapter, status, null);
     }
 
-    private JPanel createCard(String title, String author, String chapter, String status, String rate) {
+    public JPanel createCard(String title, String author, String chapter, String status, String rate) {
         JPanel card = new JPanel();
         card.setBackground(secondaryColor);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
@@ -285,51 +413,78 @@ public class Dashboard {
         return card;
     }
 
-    // ===== FOOTER PANEL =====
+    // ===== PUBLIC METHODS UNTUK MENGUBAH KONTEN DARI BACKEND =====
 
-    private JPanel createFooterPanel() {
-        JPanel footerPanel = new JPanel(new BorderLayout());
-        footerPanel.setBackground(panelBackground);
-        footerPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-
-        JPanel paginationPanel = new JPanel(new BorderLayout());
-        paginationPanel.setBackground(primaryColor);
-        paginationPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
-
-        JLabel prev = createPaginationLabel("[Prev]");
-        JLabel next = createPaginationLabel("[Next]");
-        JLabel pageInfo = new JLabel("Page 1 of X", SwingConstants.CENTER);
-        pageInfo.setForeground(Color.WHITE);
-        pageInfo.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        paginationPanel.add(prev, BorderLayout.WEST);
-        paginationPanel.add(pageInfo, BorderLayout.CENTER);
-        paginationPanel.add(next, BorderLayout.EAST);
-
-        footerPanel.add(paginationPanel, BorderLayout.CENTER);
-
-        return footerPanel;
+    /**
+     * Mengupdate total item yang ditampilkan
+     */
+    public void updateTotalItems(int count) {
+        totalLabel.setText("Total: " + count + " Items");
     }
 
-    private JLabel createPaginationLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setForeground(Color.WHITE);
-        label.setFont(new Font("Arial", Font.PLAIN, 14));
-        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    /**
+     * Menghapus semua card yang ada
+     */
+    public void clearCards() {
+        Component[] components = cardsContainer.getComponents();
+        for (Component component : components) {
+            if (component instanceof JPanel) {
+                ((JPanel) component).removeAll();
+            }
+        }
+        cardsContainer.removeAll();
+        cardsContainer.revalidate();
+        cardsContainer.repaint();
+    }
 
-        label.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                System.out.println(text + " clicked!");
+    /**
+     * Menambahkan card baru ke container
+     */
+    public void addCard(JPanel card) {
+        // Cari grid container di dalam cardsContainer
+        for (Component comp : cardsContainer.getComponents()) {
+            if (comp instanceof JPanel && ((JPanel) comp).getLayout() instanceof GridLayout) {
+                ((JPanel) comp).add(card);
+                break;
             }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                label.setForeground(secondaryColor);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                label.setForeground(Color.WHITE);
-            }
-        });
+        }
+        cardsContainer.revalidate();
+        cardsContainer.repaint();
+    }
 
-        return label;
+    /**
+     * Mendapatkan container untuk cards (untuk diisi dari backend)
+     */
+    public JPanel getCardsContainer() {
+        return cardsContainer;
+    }
+
+    /**
+     * Mendapatkan tombol filter WebComic
+     */
+    public JButton getWebComicButton() {
+        return BWebComic;
+    }
+
+    /**
+     * Mendapatkan tombol filter WebNovel
+     */
+    public JButton getWebNovelButton() {
+        return BWebNovel;
+    }
+
+    /**
+     * Mendapatkan tombol add
+     */
+    public JButton getAddButton() {
+        return addBtn;
+    }
+
+    /**
+     * Mendapatkan label total
+     */
+    public JLabel getTotalLabel() {
+        return totalLabel;
     }
 
     // Getter untuk mainPanel
