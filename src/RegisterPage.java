@@ -13,6 +13,7 @@ public class RegisterPage {
     private JTextField emailField;
     private JPasswordField passwordField1;
     private JButton makeAnAccountButton;
+    private JButton exitButton;
 
     // Variabel untuk menyimpan warna (konsisten dengan WelcomePage)
     private Color primaryColor = new Color(51, 61, 87);
@@ -113,13 +114,18 @@ public class RegisterPage {
         formPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Spacing antar section
         formPanel.add(passwordSection);
 
-        // Button panel
+        // Button panel - MENGIKUTI POLA WELCOMEPAGE
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
         buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        exitButton = new JButton("Exit");
         makeAnAccountButton = new JButton("Make an Account");
+
+        // TAMBAHKAN TOMBOL KE PANEL DENGAN GAP SEPERTI DI WELCOMEPAGE
+        buttonPanel.add(exitButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(20, 0))); // GAP KECIL 20px
         buttonPanel.add(makeAnAccountButton);
 
         // Tambahkan semua ke content panel
@@ -129,7 +135,7 @@ public class RegisterPage {
         contentPanel.add(formPanel);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         contentPanel.add(buttonPanel);
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        contentPanel.add(Box.createVerticalGlue());
 
         // **WRAPPER PANEL UNTUK MEMUSATKAN KONTEN**
         JPanel centerWrapper = new JPanel(new GridBagLayout());
@@ -208,31 +214,59 @@ public class RegisterPage {
             passwordField1.setEchoChar('•');
         }
 
-        // ========== BUTTON ==========
+        // ========== BUTTONS ==========
+        if (exitButton != null) {
+            exitButton.setBackground(primaryColor);
+            exitButton.setForeground(secondaryColor);
+            exitButton.setFont(new Font("Arial", Font.BOLD, 14));
+            Border exitBorder = BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(primaryColor, 1),
+                    BorderFactory.createEmptyBorder(10, 40, 10, 40)
+            );
+            exitButton.setBorder(exitBorder);
+            exitButton.setFocusPainted(false);
+        }
+
         if (makeAnAccountButton != null) {
             makeAnAccountButton.setBackground(primaryColor);
             makeAnAccountButton.setForeground(secondaryColor);
             makeAnAccountButton.setFont(new Font("Arial", Font.BOLD, 14));
-            Border buttonBorder = BorderFactory.createCompoundBorder(
+            Border accountBorder = BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(primaryColor, 1),
-                    BorderFactory.createEmptyBorder(12, 40, 12, 40)
+                    BorderFactory.createEmptyBorder(10, 30, 10, 30)
             );
-            makeAnAccountButton.setBorder(buttonBorder);
+            makeAnAccountButton.setBorder(accountBorder);
             makeAnAccountButton.setFocusPainted(false);
-
-            // Hover effect sederhana
-            makeAnAccountButton.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    makeAnAccountButton.setBackground(new Color(41, 51, 77));
-                }
-                public void mouseExited(java.awt.event.MouseEvent evt) {
-                    makeAnAccountButton.setBackground(primaryColor);
-                }
-            });
         }
     }
 
     private void setupEventListeners() {
+        // Listener untuk tombol Exit
+        if (exitButton != null) {
+            exitButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Konfirmasi sebelum kembali ke login
+                    int confirm = JOptionPane.showConfirmDialog(
+                            null,
+                            "Are you sure you want to go back to login?",
+                            "Exit to Login",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE
+                    );
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        MainControl.showWelcome(); // Kembali ke WelcomePage (login)
+
+                        // Reset form
+                        emailField.setText("");
+                        passwordField1.setText("");
+                    }
+                }
+            });
+        }
+
+        // Listener untuk tombol Make an Account
         if (makeAnAccountButton != null) {
             makeAnAccountButton.addActionListener(new ActionListener() {
                 @Override

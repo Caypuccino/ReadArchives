@@ -46,6 +46,10 @@ public class ProfilePage {
         applyStyling();
         setupEvents();
         loadDummyData();
+
+        resetNavButtons();
+        BMyProfile.setBackground(primaryColor);
+        BMyProfile.setForeground(secondaryColor);
     }
 
     private void createUI() {
@@ -315,11 +319,13 @@ public class ProfilePage {
     private void setupNavButtonHover(JButton button) {
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
+                // Hanya ubah warna jika tombol tidak aktif
                 if (!button.getBackground().equals(primaryColor)) {
                     button.setBackground(new Color(240, 240, 240));
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
+                // Hanya ubah warna jika tombol tidak aktif
                 if (!button.getBackground().equals(primaryColor)) {
                     button.setBackground(Color.WHITE);
                 }
@@ -334,6 +340,9 @@ public class ProfilePage {
             BMyProfile.setBackground(primaryColor);
             BMyProfile.setForeground(secondaryColor);
             // Tetap di halaman profile, tidak perlu pindah
+
+            // Untuk debug, tampilkan pesan
+            System.out.println("PROFILE tab clicked");
         });
 
         BLibrary.addActionListener(e -> {
@@ -342,15 +351,30 @@ public class ProfilePage {
             BLibrary.setForeground(secondaryColor);
             // Panggil MainControl untuk pindah ke Dashboard
             MainControl.showDashboard();
+
+            // Untuk debug, tampilkan pesan
+            System.out.println("LIBRARY tab clicked");
         });
 
         BExit.addActionListener(e -> {
+            resetNavButtons();
+            BExit.setBackground(primaryColor);
+            BExit.setForeground(secondaryColor);
+
             int response = JOptionPane.showConfirmDialog(null,
                     "Are you sure you want to exit?", "Exit Confirmation",
                     JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 System.exit(0);
+            } else {
+                // Jika user memilih NO, kembalikan ke keadaan semula
+                resetNavButtons();
+                BMyProfile.setBackground(primaryColor);
+                BMyProfile.setForeground(secondaryColor);
             }
+
+            // Untuk debug, tampilkan pesan
+            System.out.println("EXIT tab clicked");
         });
 
         // Edit Profile Button - Navigasi ke EditProfilePage via MainControl
@@ -364,9 +388,18 @@ public class ProfilePage {
         for (JButton button : navButtons) {
             button.setBackground(Color.WHITE);
             button.setForeground(primaryColor);
+
+            // Hapus border khusus untuk membuat tampilan lebih bersih
+            if (button.getText().equals("EXIT")) {
+                button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            } else {
+                button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
+                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
+            }
         }
     }
-
     private void loadDummyData() {
         // Set user data
         setUserData(currentDisplayName, currentEmail);
