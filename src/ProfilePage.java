@@ -1,11 +1,20 @@
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ProfilePage {
     private JPanel profilePagePanel;
+    private CardLayout cardLayout;
+    private JPanel cardPanel;
 
-    // Profile Section Components
+    // Navigation Components
+    private JButton BMyProfile;
+    private JButton BLibrary;
+    private JButton BExit;
+
+    // Profile Section Components (untuk card PROFILE)
     private JLabel JMyProfile;
     private JLabel JDisplayValue;
     private JLabel JEmailValue;
@@ -19,11 +28,6 @@ public class ProfilePage {
     private JLabel JReadingValue;
     private JLabel JCompletedValue;
     private JLabel JPlanToReadValue;
-
-    // Navigation Components
-    private JButton BMyProfile;
-    private JButton BLibrary;
-    private JButton BExit;
 
     // Color Scheme
     private Color primaryColor = new Color(51, 61, 87);
@@ -43,9 +47,8 @@ public class ProfilePage {
         setupEvents();
         loadDummyData();
 
-        resetNavButtons();
-        BMyProfile.setBackground(primaryColor);
-        BMyProfile.setForeground(secondaryColor);
+        // Set tombol PROFILE sebagai aktif
+        setActiveButton(BMyProfile);
     }
 
     private void createUI() {
@@ -70,42 +73,20 @@ public class ProfilePage {
         mainContentPanel.setBackground(panelBackground);
         mainContentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // NAVIGATION TABS
+        // NAVIGATION PANEL (tombol-tombol)
         JPanel navPanel = createNavigationPanel();
         mainContentPanel.add(navPanel, BorderLayout.NORTH);
 
-        // CONTENT PANEL
-        JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setOpaque(false);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+        // CARD LAYOUT PANEL (hanya untuk PROFILE card)
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(panelBackground);
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        // Card 1: PROFILE (satu-satunya card)
+        JPanel profileCard = createProfileCard();
+        cardPanel.add(profileCard, "PROFILE");
 
-        // LEFT PANEL - MY PROFILE (TINGGI SAMA STATISTICS)
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(0, 0, 0, 40);
-
-        JPanel profilePanel = createTallCompactProfilePanel();
-        contentPanel.add(profilePanel, gbc);
-
-        // RIGHT PANEL - STATISTICS
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(0, 40, 0, 0);
-
-        JPanel statsPanel = createStatisticsPanel();
-        contentPanel.add(statsPanel, gbc);
-
-        mainContentPanel.add(contentPanel, BorderLayout.CENTER);
+        mainContentPanel.add(cardPanel, BorderLayout.CENTER);
         profilePagePanel.add(mainContentPanel, BorderLayout.CENTER);
     }
 
@@ -115,6 +96,7 @@ public class ProfilePage {
         navPanel.setOpaque(false);
         navPanel.setBackground(panelBackground);
 
+        // Container untuk tabs dengan background putih
         JPanel tabsContainer = new JPanel();
         tabsContainer.setLayout(new BoxLayout(tabsContainer, BoxLayout.X_AXIS));
         tabsContainer.setBackground(Color.WHITE);
@@ -127,9 +109,6 @@ public class ProfilePage {
         BMyProfile = createNavButton("PROFILE");
         BLibrary = createNavButton("LIBRARY");
         BExit = createNavButton("EXIT");
-
-        BMyProfile.setBackground(primaryColor);
-        BMyProfile.setForeground(secondaryColor);
 
         tabsContainer.add(BMyProfile);
         tabsContainer.add(BLibrary);
@@ -166,8 +145,46 @@ public class ProfilePage {
         return button;
     }
 
-    // MY PROFILE PANEL - TINGGI TAPI LAYOUT SAMA SEBELUMNYA
-    private JPanel createTallCompactProfilePanel() {
+    private JPanel createProfileCard() {
+        JPanel profileCard = new JPanel(new BorderLayout());
+        profileCard.setBackground(panelBackground);
+
+        // CONTENT PANEL untuk Profile
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setOpaque(false);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // LEFT PANEL - MY PROFILE
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(0, 0, 0, 40);
+
+        JPanel profilePanel = createProfileContentPanel();
+        contentPanel.add(profilePanel, gbc);
+
+        // RIGHT PANEL - STATISTICS
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(0, 40, 0, 0);
+
+        JPanel statsPanel = createStatisticsPanel();
+        contentPanel.add(statsPanel, gbc);
+
+        profileCard.add(contentPanel, BorderLayout.CENTER);
+        return profileCard;
+    }
+
+    private JPanel createProfileContentPanel() {
         JPanel profilePanel = new JPanel();
         profilePanel.setLayout(new BorderLayout());
         profilePanel.setBackground(backgroundColor);
@@ -384,62 +401,97 @@ public class ProfilePage {
             BShowPassword.setForeground(new Color(100, 100, 100));
             BShowPassword.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
         }
-
-        // Style Navigation Buttons
-        setupNavButtonHover(BMyProfile);
-        setupNavButtonHover(BLibrary);
-        setupNavButtonHover(BExit);
     }
 
-    private void setupNavButtonHover(JButton button) {
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (!button.getBackground().equals(primaryColor)) {
-                    button.setBackground(new Color(240, 240, 240));
-                }
+    // Method untuk mengatur tombol aktif
+    private void setActiveButton(JButton button) {
+        // Reset semua tombol
+        JButton[] navButtons = {BMyProfile, BLibrary, BExit};
+        for (JButton btn : navButtons) {
+            btn.setBackground(Color.WHITE);
+            btn.setForeground(primaryColor);
+
+            // Atur border
+            if (btn.getText().equals("EXIT")) {
+                btn.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            } else {
+                btn.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
+                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (!button.getBackground().equals(primaryColor)) {
-                    button.setBackground(Color.WHITE);
-                }
-            }
-        });
+        }
+
+        // Set tombol aktif
+        button.setBackground(primaryColor);
+        button.setForeground(secondaryColor);
+
+        // Untuk tombol aktif, pastikan border konsisten
+        if (!button.getText().equals("EXIT")) {
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            ));
+        }
     }
 
     private void setupEvents() {
-        // Navigation buttons
-        BMyProfile.addActionListener(e -> {
-            resetNavButtons();
-            BMyProfile.setBackground(primaryColor);
-            BMyProfile.setForeground(secondaryColor);
-            System.out.println("PROFILE tab clicked");
-        });
-
-        BLibrary.addActionListener(e -> {
-            resetNavButtons();
-            BLibrary.setBackground(primaryColor);
-            BLibrary.setForeground(secondaryColor);
-            MainControl.showDashboard();
-            System.out.println("LIBRARY tab clicked");
-        });
-
-        BExit.addActionListener(e -> {
-            resetNavButtons();
-            BExit.setBackground(primaryColor);
-            BExit.setForeground(secondaryColor);
-
-            int response = JOptionPane.showConfirmDialog(null,
-                    "Are you sure you want to exit?", "Exit Confirmation",
-                    JOptionPane.YES_NO_OPTION);
-            if (response == JOptionPane.YES_OPTION) {
-                System.exit(0);
-            } else {
-                resetNavButtons();
-                BMyProfile.setBackground(primaryColor);
-                BMyProfile.setForeground(secondaryColor);
+        // Navigation buttons - SEDERHANA TANPA REDIRECTING
+        BMyProfile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setActiveButton(BMyProfile);
+                System.out.println("PROFILE button clicked");
+                // Tetap di halaman ProfilePage
             }
+        });
 
-            System.out.println("EXIT tab clicked");
+        BLibrary.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Set tombol Library aktif sebentar
+                setActiveButton(BLibrary);
+
+                // Kembalikan ke tombol Profile (untuk visual feedback)
+                SwingUtilities.invokeLater(() -> {
+                    // Tunggu sedikit untuk memberikan visual feedback
+                    try {
+                        Thread.sleep(150); // Delay singkat 150ms
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    // Kembalikan tombol ke Profile
+                    setActiveButton(BMyProfile);
+
+                    // Navigasi ke Dashboard
+                    MainControl.showDashboard();
+                });
+
+                System.out.println("LIBRARY button clicked - navigating to dashboard");
+            }
+        });
+
+        BExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Set tombol Exit aktif
+                setActiveButton(BExit);
+
+                // Tampilkan dialog konfirmasi
+                int response = JOptionPane.showConfirmDialog(null,
+                        "Are you sure you want to exit?", "Exit Confirmation",
+                        JOptionPane.YES_NO_OPTION);
+
+                if (response == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                } else {
+                    // Jika user batal, kembalikan ke tombol Profile
+                    setActiveButton(BMyProfile);
+                }
+
+                System.out.println("EXIT button clicked");
+            }
         });
 
         // Edit Profile Button
@@ -462,23 +514,6 @@ public class ProfilePage {
                     BShowPassword.setToolTipText("Show password");
                 }
             });
-        }
-    }
-
-    private void resetNavButtons() {
-        JButton[] navButtons = {BMyProfile, BLibrary, BExit};
-        for (JButton button : navButtons) {
-            button.setBackground(Color.WHITE);
-            button.setForeground(primaryColor);
-
-            if (button.getText().equals("EXIT")) {
-                button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            } else {
-                button.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)),
-                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
-                ));
-            }
         }
     }
 
@@ -563,10 +598,15 @@ public class ProfilePage {
         return profilePagePanel;
     }
 
+    // Method untuk reset ke tombol PROFILE
+    public void resetToProfile() {
+        setActiveButton(BMyProfile);
+    }
+
     // Test standalone
 //    public static void main(String[] args) {
 //        SwingUtilities.invokeLater(() -> {
-//            JFrame frame = new JFrame("ReadArchive - Tall Profile, Same Layout");
+//            JFrame frame = new JFrame("ReadArchive - Simple Navigation");
 //            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //            frame.setSize(1000, 700);
 //            frame.setMinimumSize(new Dimension(900, 600));
