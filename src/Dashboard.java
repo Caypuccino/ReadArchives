@@ -86,6 +86,7 @@ public class Dashboard {
         initializeSampleData();
         myListCards = myListRepo.getAll(); // Load data My List dari database (backend)
         displayAllCards(); // Tampilkan semua data awal
+        updateStatistics();
     }
 
     // ===== INISIALISASI DATA =====
@@ -845,6 +846,8 @@ public class Dashboard {
         myListRepo.insert(myListData);
         myListCards.add(myListData);
 
+        updateStatistics();
+
         if ("MY LIST".equals(currentFilter)) {
             displayFilteredCards(myListCards, true);
         }
@@ -854,6 +857,31 @@ public class Dashboard {
                         "Status: " + myListData.myStatus + "\n" +
                         "Progress: " + myListData.myProgress,
                 "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void updateStatistics() {
+        int total = myListCards.size();
+        int reading = 0;
+        int completed = 0;
+        int planToRead = 0;
+
+        for (CardData item : myListCards) {
+            if (item.myStatus == null) continue;
+
+            switch (item.myStatus) {
+                case "Reading":
+                    reading++;
+                    break;
+                case "Completed":
+                    completed++;
+                    break;
+                case "Plan to Read":
+                    planToRead++;
+                    break;
+            }
+        }
+
+        MainControl.getProfilePage().setStatistics(total, reading, completed, planToRead);
     }
 
     // ===== EDIT MY LIST ITEM =====
