@@ -1,9 +1,9 @@
-// File: Dashboard.java
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.*;
 
 public class Dashboard {
     public Container mainPanel;
@@ -34,6 +34,9 @@ public class Dashboard {
     private List<CardData> webComicCards = new ArrayList<>();
     private List<CardData> webNovelCards = new ArrayList<>();
     private List<CardData> myListCards = new ArrayList<>();
+
+    // Backend repository untuk koneksi MySQL
+    private MyListRepository myListRepo = new MyListRepository();
 
     // State untuk mengetahui filter yang aktif
     private String currentFilter = "ALL";
@@ -80,6 +83,7 @@ public class Dashboard {
 
         // Inisialisasi data
         initializeSampleData();
+        myListCards = myListRepo.getAll(); // Load data My List dari database (backend)
         displayAllCards(); // Tampilkan semua data awal
     }
 
@@ -577,6 +581,9 @@ public class Dashboard {
                         "Confirm Removal", JOptionPane.YES_NO_OPTION);
 
                 if (confirm == JOptionPane.YES_OPTION) {
+                    // Hapus dari database
+                    myListRepo.delete(data.title);
+                    // Hapus dari list (UI)
                     myListCards.remove(data);
                     displayFilteredCards(myListCards, true);
                     JOptionPane.showMessageDialog(card,
@@ -801,6 +808,9 @@ public class Dashboard {
             // Add to My List
             myListCards.add(myListData);
 
+            // Menyimpan ke database (backend)
+            myListRepo.insert(myListData);
+
             dialog.dispose();
 
             // Refresh jika sedang menampilkan My List
@@ -967,6 +977,9 @@ public class Dashboard {
             } else {
                 data.myRating = null;
             }
+
+            // Simpan ke database
+            myListRepo.update(data);
 
             dialog.dispose();
 
