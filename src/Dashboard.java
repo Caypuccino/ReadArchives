@@ -1009,7 +1009,7 @@ public class Dashboard {
 
             // Simpan ke database
             myListRepo.update(data);
-
+            updateStatistics();
             dialog.dispose();
 
             // Refresh display
@@ -1088,6 +1088,30 @@ public class Dashboard {
         cardsContainer.revalidate();
         cardsContainer.repaint();
     }
+
+    public void updateMyList(CardData updatedData) {
+        // Update ke database
+        myListRepo.update(updatedData);
+
+        // Update list lokal
+        for (CardData item : myListCards) {
+            if (item.title.equals(updatedData.title)) {
+                item.myStatus = updatedData.myStatus;
+                item.myProgress = updatedData.myProgress;
+                item.myRating = updatedData.myRating;
+                break;
+            }
+        }
+
+        // Update statistik
+        updateStatistics();
+
+        // Refresh tampilan My List
+        if ("MY LIST".equals(currentFilter)) {
+            displayFilteredCards(myListCards, true);
+        }
+    }
+
 
     // ===== DATA CLASS =====
     public static class CardData {
