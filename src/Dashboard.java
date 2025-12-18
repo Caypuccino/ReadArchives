@@ -630,8 +630,8 @@ public class Dashboard {
                 }
 
                 if (!exists) {
-                    // Gunakan dialog sederhana
-                    showAddToMyListDialog(data);
+                    AddToMyListForm form = new AddToMyListForm(this, data);
+                    form.show();
                 } else {
                     JOptionPane.showMessageDialog(card,
                             "'" + data.title + "' is already in My List!",
@@ -842,10 +842,10 @@ public class Dashboard {
     }
 
     public void addToMyList(CardData myListData) {
+        myListRepo.insert(myListData);
         myListCards.add(myListData);
 
-        // Refresh My List jika sedang ditampilkan
-        if (currentFilter.equals("MY LIST")) {
+        if ("MY LIST".equals(currentFilter)) {
             displayFilteredCards(myListCards, true);
         }
 

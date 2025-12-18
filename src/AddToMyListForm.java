@@ -32,7 +32,6 @@ public class AddToMyListForm {
         dialog = new JDialog();
         dialog.setTitle("Add to My List - " + cardData.title);
         dialog.setModal(true);
-        dialog.setSize(400, 400);
         dialog.setLocationRelativeTo(null);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(backgroundColor);
@@ -67,6 +66,9 @@ public class AddToMyListForm {
         mainPanel.add(buttonPanel);
 
         dialog.add(mainPanel, BorderLayout.CENTER);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setResizable(false);
     }
 
     private JPanel createInfoPanel() {
